@@ -39,6 +39,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DistortionTex:
+        m_Texture: {fileID: 2800000, guid: 1cffb89d1a4ca964d870c38761a8e63c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -68,7 +72,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _main_tex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 20c00e49454c36e48aef308938ad6f82, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _secondary_tex:
+        m_Texture: {fileID: 2800000, guid: 398368033157ea64b94a597c5c9af1b0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
@@ -77,13 +85,16 @@ Material:
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
+    - _DistortionStrength: 0.04
     - _DstBlend: 0
-    - _EdgeGlowWidth: 0.1
+    - _EdgeGlowMaxWidth: 0.9
+    - _EdgeGlowMinWidth: 0
+    - _EdgeGlowWidth: 0
     - _FresnelPower: 2.6
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _MainTexSpeed: 0.1
+    - _MainTexSpeed: 2
     - _MainTexTransparency: 1
     - _Metallic: 0
     - _Mode: 0
@@ -96,11 +107,19 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - _blend: 1
     - _dissolve_amount: 1
+    - _edge_glow_width: 0.7
     - _line_size: 0.1
+    - _main_texTransparency: 1
+    - _main_textSpeed: 0.1
+    - _secondary_texSpeed: 0.1
+    - _secondary_texTransparency: 1
     m_Colors:
-    - _Color: {r: 0.0608686, g: 0.1206929, b: 0.3886792, a: 1}
-    - _EdgeGlowColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.8978336, g: 0.96981126, b: 0.13723731, a: 1}
+    - _EdgeGlowColor: {r: 0.9764706, g: 0.87812424, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _color: {r: 1, g: 0.2425963, b: 0, a: 1}
+    - _edge_glow_color: {r: 0.6952242, g: 0.79622644, b: 0.040562414, a: 1}
     - _line_color: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
