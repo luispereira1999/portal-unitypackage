@@ -1,7 +1,6 @@
 Shader "Unlit/ShieldShader"
 {
-   
-     Properties
+ Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Main Texture", 2D) = "white" {}
@@ -16,6 +15,8 @@ Shader "Unlit/ShieldShader"
         _EdgeGlowMaxWidth ("Edge Glow Max Width", Range(0, 0.5)) = 0.1
         _DistortionTex ("Distortion Texture", 2D) = "white" {}
         _DistortionStrength ("Distortion Strength", Range(0, 1)) = 0.1
+        _DissolveMask ("Dissolve Mask", 2D) = "white" {}
+        _DissolveAmount ("Dissolve Amount", Range(0, 1)) = 0.0
     }
     SubShader
     {
@@ -49,6 +50,7 @@ Shader "Unlit/ShieldShader"
             sampler2D _MainTex;
             sampler2D _SecondaryTex;
             sampler2D _DistortionTex;
+            sampler2D _DissolveMask;
             float4 _MainTex_ST;
             float4 _SecondaryTex_ST;
             float4 _Color;
@@ -61,6 +63,7 @@ Shader "Unlit/ShieldShader"
             float _EdgeGlowMinWidth;
             float _EdgeGlowMaxWidth;
             float _DistortionStrength;
+            float _DissolveAmount;
 
             v2f vert (appdata_t v)
             {
@@ -74,41 +77,43 @@ Shader "Unlit/ShieldShader"
 
             half4 frag (v2f i) : SV_Target
             {
-                // calcula a distorção, que pode ser tanto na direção positiva como negativa
+                // Calcula a distorção, que pode ser tanto na direção positiva como negativa
                 float2 distortion = tex2D(_DistortionTex, i.uv).rg * 2.0 - 1.0;
                 distortion *= _DistortionStrength;
                 
-                // calcula as coodernadas uv para o movimento vertical da textura principal
+                // Calcula as coodernadas uv para o movimento vertical da textura principal
                 float2 mainTexUV = i.uv + distortion;
                 mainTexUV.x += _Time.x * _MainTexSpeed;
 
                 float4 mainTexColor = tex2D(_MainTex, mainTexUV);
                 mainTexColor.a *= _MainTexTransparency;
 
-                // calcula as coodernadas uv para o movimento vertical da segunda textura
+                // Calcula as coodernadas uv para o movimento vertical da segunda textura
                 float2 secondaryTexUV = i.uv + distortion;
                 secondaryTexUV.y += _Time.y * _SecondaryTexSpeed;
 
                 float4 secondaryTexColor = tex2D(_SecondaryTex, secondaryTexUV);
                 secondaryTexColor.a *= _SecondaryTexTransparency;
 
-                // mistura as cores das texturas
+                // Mistura as cores das texturas
                 float4 blendedColor = lerp(mainTexColor, secondaryTexColor, _BlendFactor);
 
-                //aplica a cor e mantém a textura
+                // Aplica a cor e mantém a textura
                 half4 color = _Color * blendedColor;
                 color.a = blendedColor.a * _Color.a;
 
-                //calcula a largura do pulsar aplicado ao brilho
+                // Calcula o efeito de brilho
                 float pulsatingWidth = lerp(_EdgeGlowMinWidth, _EdgeGlowMaxWidth, (sin(_Time.y * 2.0) * 0.5 + 0.5));
-
-                // calcula o efeito de brilho
                 float edgeDist = min(i.uv.x, min(1.0 - i.uv.x, min(i.uv.y, 1.0 - i.uv.y)));
                 float glowFactor = smoothstep(0.0, pulsatingWidth, edgeDist);
                 half4 edgeGlow = _EdgeGlowColor * glowFactor;
-
-
                 color.rgb += edgeGlow.rgb * edgeGlow.a;
+
+                // Aplica o efeito de dissolução
+                float dissolveValue = tex2D(_DissolveMask, i.uv).r;
+                float dissolveAlpha = step(dissolveValue, _DissolveAmount);
+
+                color.a *= dissolveAlpha;
 
                 return color;
             }

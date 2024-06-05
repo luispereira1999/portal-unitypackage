@@ -7843,8 +7843,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1263972055}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.06336569, y: 0.000000060977186, z: -0.0000000038716417, w: 0.99799037}
-  m_LocalPosition: {x: 0, y: 1.4399999, z: -3.43}
+  m_LocalRotation: {x: -0.110521376, y: -0.023193195, z: -0.0025798557, w: 0.9935998}
+  m_LocalPosition: {x: 0.18663871, y: 0.55, z: -3.4256434}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10891,6 +10891,7 @@ GameObject:
   - component: {fileID: 1862808094}
   - component: {fileID: 1862808093}
   - component: {fileID: 1862808092}
+  - component: {fileID: 1862808096}
   m_Layer: 0
   m_Name: Shield
   m_TagString: Untagged
@@ -10985,6 +10986,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &1862808096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862808091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5aab789f59a8d50488bdfe9eb0d0129f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  renderer: {fileID: 1862808093}
+  dissolveSpeed: 1
+  maxDissolveAmount: 2
+  material: {fileID: 0}
+  dissolveAmount: 0
 --- !u!1001 &1866229466
 PrefabInstance:
   m_ObjectHideFlags: 0
