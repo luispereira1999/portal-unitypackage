@@ -8,6 +8,7 @@ Shader "Custom/GlowEffectShader"
         _GlowIntensity ("Glow Intensity", Range(0, 5)) = 1.0
         _GlowSpeed ("Glow Speed", Range(0, 10)) = 1.0
         _Transparency ("Transparency", Range(0, 1)) = 1.0
+        _RotationSpeed ("Rotation Speed", Range(0, 1)) = 0.1
     }
     SubShader
     {
@@ -43,13 +44,14 @@ Shader "Custom/GlowEffectShader"
             float _GlowIntensity;
             float _GlowSpeed;
             float _Transparency;
+            float _RotationSpeed;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
 
-                float angle = _Time.y * 0.1; // Adjust the speed of rotation here
+                float angle = _Time.y * _RotationSpeed; 
                 float cosA = cos(angle);
                 float sinA = sin(angle);
                 float2x2 rotationMatrix = float2x2(cosA, -sinA, sinA, cosA);
@@ -60,18 +62,14 @@ Shader "Custom/GlowEffectShader"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // Calculate the animated glow effect
+
                 float glow = (sin( _Time.y * _GlowSpeed) + 1.0) * 0.5 * _GlowIntensity;
                 fixed4 glowColor = _GlowColor * glow;
                 fixed4 texColor = tex2D(_MainTex, i.uv);
                 
-                float _Threshold = _Transparency;
-                
-
-
                 fixed4 finalColor = ( _BaseColor + glowColor) * texColor;
 
-                if (texColor.r < _Threshold || texColor.g < _Threshold || texColor.b < _Threshold) {
+                if (texColor.r < _Transparency || texColor.g < _Transparency || texColor.b < _Transparency) {
                     finalColor.a = 0.25;
 
                 }

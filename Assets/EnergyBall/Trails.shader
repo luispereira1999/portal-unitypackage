@@ -5,6 +5,7 @@ Shader "Unlit/Trails"
         _MainTex("Texture", 2D) = "white" {}
         [HDR]_Color ("Color", Color) = (1, 1, 1, 1)
         [HDR]_GradientColor ("Gradient Color", Color) = (1,1,1,1)
+        _Transparency ("Transparency", Range(0, 1)) = 0.2
     }
     SubShader
     {
@@ -35,6 +36,7 @@ Shader "Unlit/Trails"
             float4 _MainTex_ST;
             float4 _Color;
             float4 _GradientColor;
+            float _Transparency;
 
             v2f vert(appdata v)
             {
@@ -59,7 +61,7 @@ Shader "Unlit/Trails"
 
                 fixed4 gradientColor = lerp(col, _GradientColor, i.uv.y);
 
-                gradientColor.a = 0.2;  
+                gradientColor.a = _Transparency;  
                 
                 return gradientColor;
             }

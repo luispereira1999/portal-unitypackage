@@ -62,10 +62,8 @@ Shader "Unlit/Lighting"
 
                 float alpha = sin(_Time.y * _FadeSpeed + i.uv.y );
 
-                fixed4 finalColor = col ;// * _Color;
-                //float curTime = (_Time.y ) % 1;
-                finalColor.a *= alpha;
-                //finalColor.a = curTime > 0.5 ? 1.0 : 0.0;                
+                fixed4 finalColor = col ;
+                finalColor.a *= alpha;            
 
                 return finalColor;
             }
