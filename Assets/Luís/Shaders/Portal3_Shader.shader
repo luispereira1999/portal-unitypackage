@@ -36,22 +36,22 @@
             #pragma fragment frag
             #include "UnityCG.cginc"
 
-            struct appdata_t
+            struct appdata
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
-                // fixed3 normal : NORMAL;
+                fixed3 normal : NORMAL;
             };
 
             struct v2f
             {
-                // float4 pos : SV_POSITION;
                 float2 uv : TEXCOORD0;
-                // float rim : TEXCOORD1;
-                float4 vertex : SV_POSITION;
+                float rim : TEXCOORD1;
+                float4 position : SV_POSITION;
             };
 
             sampler2D _MainTex;
+            float4 _MainTex_ST;
             float4 _Color;
             float4 _StripeColor;
             float _StripeWidth;
@@ -61,12 +61,11 @@
 
             half _FresnelPower;
             half2 _ScrollDirection;
-            float4 _MainTex_ST;
 
-           float _LineThickness;
+            float _LineThickness;
             float _BlurAmount;
 
-            v2f vert (appdata_t v)
+            v2f vert (appdata v)
             {
                 // v2f o;
                 // o.pos = UnityObjectToClipPos(v.vertex);
@@ -75,24 +74,16 @@
                 // return o;
 
 
-                // v2f o;
-
-                // o.pos = UnityObjectToClipPos(v.vertex);
-                // o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-
-                // fixed3 viewDir = normalize(ObjSpaceViewDir(v.vertex));
-                // o.rim = 1.0 - saturate(dot(viewDir, v.normal));
-
-                // // o.uv += _ScrollDirection * _Time.y;
-                // // o.uv.x = 1.85 * v.uv.x;
-                // o.uv += _ScrollDirection * _Time.y;
-                // o.uv.x = 1.85 * v.uv.x;
-               
-                // return o;
-
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
+
+                o.position = UnityObjectToClipPos(v.vertex);
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
+                fixed3 viewDir = normalize(ObjSpaceViewDir(v.vertex));
+                o.rim = 1.0 - saturate(dot(viewDir, v.normal));
+
+                o.uv += _ScrollDirection * _Time.y;
+               
                 return o;
             }
 
@@ -224,38 +215,10 @@
                 // return finalColor;
 
 
-
-                fixed4 baseColor = tex2D(_MainTex, i.uv) * _Color;
-                float offset = _Time.y * _Speed;
-                int numStripes = 1;
-                float stripeHeight = 0.1;
-
-                float stripePattern = 0.0;
-                for (int s = 0; s < numStripes; s++)
-                {
-                    float stripeWidth = 1.0 / numStripes;
-                    float stripePos = stripeWidth * s;
-                    stripePattern += step(stripePos - stripeWidth / 2.0, frac((i.uv.y + offset) / stripeWidth)) * step(frac((i.uv.y + offset) / stripeWidth), stripePos + stripeWidth / 2.0) * step(stripeHeight, i.uv.y);
-                }
-
-                fixed4 stripeColor = _StripeColor * stripePattern;
-                fixed4 finalColor = lerp(baseColor, stripeColor, stripePattern);
-                // finalColor.a = 0.7 * _Color.a;
-                finalColor.a = 3 * _Color.a;
-                // return finalColor;
-
-
-
-
-                float position = abs(frac(_Time.y * _Speed * 0.5) * 2.0 - 1.0); // Vertical position between 0 and 1
-                float lineCenter = position;
-                float distance = abs(i.uv.y - lineCenter);
-                float blur = smoothstep(0.0, _BlurAmount, distance);
-
-                float alpha = smoothstep(0.0, _LineThickness * 0.5, _LineThickness * 0.5 - distance);
-                alpha *= (1.0 - blur);
-
-                return fixed4(finalColor.rgb, finalColor.a * alpha);
+                fixed4 pixel = tex2D(_MainTex, i.uv) * _Color * pow(_FresnelPower, i.rim);
+                pixel = lerp(0, pixel, i.rim);
+                
+                return clamp(pixel, 0, _Color);
             }
             ENDCG
         }
