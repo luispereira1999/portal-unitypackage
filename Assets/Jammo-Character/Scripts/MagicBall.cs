@@ -11,12 +11,17 @@ public class MagicBall : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
+        transform.SetParent(parent.transform);
+        transform.position = parent.transform.position;
+        
     }
 
     public void ReleaseMe()
     {
         transform.SetParent(null);
 
+        rb.isKinematic = false;
         rb.useGravity = true;
         transform.rotation = parent.transform.rotation;
         

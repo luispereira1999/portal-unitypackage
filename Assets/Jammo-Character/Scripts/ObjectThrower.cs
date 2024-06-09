@@ -5,7 +5,7 @@ public class ObjectThrower : MonoBehaviour
     public GameObject objectToThrow; // Assign the already instantiated object in the Inspector
     public Transform throwPoint; // The point from where the object will be thrown
     public float throwForce = 10f; // Adjust the force of the throw
-    public Rigidbody rb;
+    private Rigidbody rb;
 
     void Start()
     {
