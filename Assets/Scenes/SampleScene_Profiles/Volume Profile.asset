@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-9209315867046730568
+--- !u!114 &-1356163398652704558
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -18,13 +18,13 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 2.56
+    value: 6.76
   threshold:
     overrideState: 1
     value: 1
   softKnee:
     overrideState: 0
-    value: 1
+    value: 0.5
   clamp:
     overrideState: 0
     value: 65472
@@ -36,7 +36,7 @@ MonoBehaviour:
     value: 0
   color:
     overrideState: 0
-    value: {r: 0.009316767, g: 0, b: 0.18867922, a: 1}
+    value: {r: 1, g: 1, b: 1, a: 1}
   fastMode:
     overrideState: 0
     value: 0
@@ -57,7 +57,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8e6292b2c06870d4495f009f912b9600, type: 3}
-  m_Name: Post-process
+  m_Name: Volume Profile
   m_EditorClassIdentifier: 
   settings:
-  - {fileID: -9209315867046730568}
+  - {fileID: -1356163398652704558}

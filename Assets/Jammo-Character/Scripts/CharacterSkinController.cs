@@ -10,7 +10,7 @@ public class CharacterSkinController : MonoBehaviour
     public Texture2D[] albedoList;
     [ColorUsage(true,true)]
     public Color[] eyeColors;
-    public enum EyePosition { normal, happy, angry, dead}
+    public enum EyePosition { normal, happy, angry, dead, throwing}
     public EyePosition eyeState;
 
     // Start is called before the first frame update
@@ -48,6 +48,11 @@ public class CharacterSkinController : MonoBehaviour
             ChangeEyeOffset(EyePosition.dead);
             ChangeAnimatorIdle("dead");
         }
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            ChangeEyeOffset(EyePosition.throwing);
+            ChangeAnimatorIdle("throwing");
+        }
     }
 
     void ChangeAnimatorIdle(string trigger)
@@ -83,6 +88,9 @@ public class CharacterSkinController : MonoBehaviour
                 break;
             case EyePosition.dead:
                 offset = new Vector2(.33f, .66f);
+                break;
+            case EyePosition.throwing:
+                offset = new Vector2(0, 0);
                 break;
             default:
                 break;
