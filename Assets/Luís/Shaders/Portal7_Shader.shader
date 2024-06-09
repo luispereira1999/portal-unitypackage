@@ -8,7 +8,7 @@
         _NoiseViewY ("Noise View Y", 2D) = "white" {}
         _ScreenTexture ("Screen Texture", 2D) = "white" {}
         _TintColor ("Tint Color", Color) = (1,1,1,1)
-        _FesnelAmount ("Fresnel Amount", Range(0.0, 5.0)) = 0.1
+        _FresnelAmount ("Fresnel Amount", Range(0.0, 5.0)) = 0.1
         _DistortionVertex ("Distortion Vertex", Range(0.0, 0.3)) = 0.03
         _SpeedVertex ("Speed Vertex", Range(0.0, 1.0)) = 0.1
         _NoiseVertex ("Noise Vertex", 2D) = "white" {}
@@ -33,7 +33,7 @@
             sampler2D _NoiseViewY;
             sampler2D _ScreenTexture;
             float4 _TintColor;
-            float _FesnelAmount;
+            float _FresnelAmount;
             float _DistortionView;
             float _SpeedView;
 
@@ -89,7 +89,7 @@
                 float2 noiseDistort = float2(noiseValueX, noiseValueY) * _DistortionView;
 
                 float3 distortedScreenTexture = tex2D(_ScreenTexture, i.uv + noiseDistort).rgb;
-                float3 fresnelTint = (_TintColor.rgb * fresnel(_FesnelAmount, i.normal, i.viewDir));
+                float3 fresnelTint = (_TintColor.rgb * fresnel(_FresnelAmount, i.normal, i.viewDir));
 
                 return float4(distortedScreenTexture + fresnelTint, 1.0);
             }
