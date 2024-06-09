@@ -119,9 +119,9 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
-    - _dissolve_amount: 0.55
+    - _dissolve_amount: 0.15
     - _dissolve_speed: 1
-    - _line_size: 0.039
+    - _line_size: 0
     m_Colors:
     - _BorderColor: {r: 0.9547169, g: 0.7447134, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
