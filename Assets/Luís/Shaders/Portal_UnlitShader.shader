@@ -26,8 +26,10 @@
         // 3 - RUÍDO
         [Space(10)] [Header(Ruido)] [Space(5)]
         [Toggle] _HasNoiseDistortion ("Tem Ruído?", Int) = 0
-        _NoiseDirection ("Direção do Ruído", Vector) = (1, 0, 0)
-        _NoiseSpeed ("Velocidade do Ruído", Range(0, 10)) = 2
+        _NoiseDirectionX ("Direção X do Ruído", Vector) = (0.04, 0, 0)
+        _NoiseDirectionY ("Direção Y do Ruído", Vector) = (0, 0.04, 0)
+        _NoiseSpeedX ("Velocidade X do Ruído", Range(0, 10)) = 2
+        _NoiseSpeedY ("Velocidade Y do Ruído", Range(0, 10)) = 2
         _NoiseTextureX ("Noise View X", 2D) = "white" {}
         _NoiseTextureY ("Noise View Y", 2D) = "white" {}
 
@@ -36,15 +38,17 @@
         [Space(10)] [Header(Pulsacao)] [Space(5)]
         [Toggle] _HasPulse ("Tem Pulsação?", Int) = 0
         _PulseColor ("Cor da Pulsação", Color) = (1, 0, 0, 1)
-        _PulseSpeed ("Velocidade da Pulsação", Range(-2, 10)) = 2
+        _PulseSpeed ("Velocidade da Pulsação", Range(-8, 8)) = 2
+        _PulseCircle ("Círculo da Pulsação", Range(0.1, 5)) = 0.9
+        _PulseIntensity ("Intensidade da Pulsação", Range(0.1, 100)) = 40
+         
 
-
-        // 5 - LAZER
-        [Space(10)] [Header(Lazer)] [Space(5)]
-        [Toggle] _HasLazer ("Tem Lazer?", Int) = 0
-        _LazerColor ("Cor do Lazer", Color) = (1, 0, 0, 1)
-        _LazerSpeed ("Velocidade do Lazer", Range(0, 7)) = 1
-        _LazerWidth ("Largura do Lazer", Range(0, 3)) = 2
+        // 5 - LASER
+        [Space(10)] [Header(Laser)] [Space(5)]
+        [Toggle] _HasLaser ("Tem Laser?", Int) = 0
+        _LaserColor ("Cor do Laser", Color) = (1, 0, 0, 1)
+        _LaserSpeed ("Velocidade do Laser", Range(0, 7)) = 1
+        _LaserWidth ("Largura do Laser", Range(0, 3)) = 2
 
 
         // 6 - DISTORÇÃO DE VÉRTICES
@@ -102,8 +106,10 @@
 
             // 3 - RUÍDO
             int _HasNoiseDistortion;
-            float3 _NoiseDirection;
-            float _NoiseSpeed;
+            float3 _NoiseDirectionX;
+            float3 _NoiseDirectionY;
+            float _NoiseSpeedX;
+            float _NoiseSpeedY;
             sampler2D _NoiseTextureX;
             sampler2D _NoiseTextureY;
 
@@ -112,13 +118,15 @@
             int _HasPulse;
             float4 _PulseColor;
             float _PulseSpeed;
+            float _PulseCircle;
+            float _PulseIntensity;
 
 
-            // 5 - LAZER
-            int _HasLazer;
-            float4 _LazerColor;
-            float _LazerSpeed;
-            float _LazerWidth;
+            // 5 - LASER
+            int _HasLaser;
+            float4 _LaserColor;
+            float _LaserSpeed;
+            float _LaserWidth;
 
 
             // 6 - DISTORÇÃO DE VÉRTICES
@@ -168,23 +176,23 @@
                 return pow((1.0 - saturate(dot(normalize(normal), normalize(view)))), amount);
             }
 
-            float3 pulse(float2 uv, float4 screenParams, float4 pulseColor, float4 time, float _PulseRadialSpeed)
+            float3 pulse(float2 uv, float4 screenParams, float4 pulseColor, float4 time, float _PulseRadialSpeed, float pulseCircle, float pulseIntensity)
             {
                 // normalizar as coordenadas para variar entre -1 a 1 em x e y
                 float2 fragCoord = uv * screenParams.xy;
                 float2 normalizedCoords = (2.0 * fragCoord - screenParams.xy) / screenParams.y;
 
-                // calcular distância radial do pixel ao centro do objeto
-                float radialDistance = length(normalizedCoords ) * 0.9;
-                float squaredRadialDistance = pow(radialDistance, 2.0);
+                // calcular distância radial do pixel ao centro do objeto ajustada pelo tamanho do círculo
+                float radialDistance = length(normalizedCoords) / pulseCircle;
+                float squaredRadialDistance = pow(radialDistance, 2);
 
-                // combinar 2 funções seno com a distância ao quadrado
-                float sin1 = sin(radialDistance * 0.8 - 1.6);
-                float sin2 = sin(radialDistance - 0.010);
-                float combinedSin = sin(squaredRadialDistance - time.y * _PulseRadialSpeed + sin1) * sin2;
+                // criar efeito de ondulação através da função seno,
+                // que varia com a distância radial e o tempo
+                float sin1 = sin(radialDistance);
+                float combinedSin = sin(squaredRadialDistance - time.y * _PulseRadialSpeed + sin1) * sin1;
 
                 // aplicar a cor de pulsaçõ baseada no valor combinado
-                pulseColor.rgb *= abs(1.0 / (combinedSin * 10.8)) - 0.01;
+                pulseColor.rgb *= abs(1.0 / (combinedSin * pulseIntensity));
                 return pulseColor.rgb;
             }
 
@@ -192,10 +200,10 @@
             float laser(float2 uv, float speed, float width, float4 time)
             {
                 // posição vertical entre 0 (baixo) e 1 (topo)
-                float lazerPosition = abs(frac(time.y * speed * 0.5) * 2.0 - 1.0);
+                float laserPosition = abs(frac(time.y * speed * 0.5) * 2.0 - 1.0);
                    
-                float lazerCenter = lazerPosition;
-                float distance = abs(uv.y - lazerCenter);
+                float laserCenter = laserPosition;
+                float distance = abs(uv.y - laserCenter);
                 float blur = smoothstep(0, 2, distance);
 
                 float alpha = smoothstep(width * 0.5, -width * 0.5, distance);
@@ -209,6 +217,11 @@
             v2f vert(appdata v)
             {
                 v2f o;
+
+                o.uv = v.uv;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.normal = UnityObjectToWorldNormal(v.normal);
+                o.viewDir = normalize(ObjSpaceViewDir(v.vertex));
 
 
                 /*******************************************************
@@ -230,16 +243,12 @@
                 if (_HasVertexDistortion == 1)
                 {
                     float4 noiseSample = tex2Dlod(_NoiseVertex, float4(v.uv + (_Time.y * _SpeedVertex), 0, 0));
-                    float noiseVal = (noiseSample.r * 2.0) - 1.0;  // entre -1 e 1
-                    float3 displacement = v.normal * noiseVal * _DistortionVertex;
+                    float noiseValue = (noiseSample.r * 2.0) - 1.0;  // entre -1 e 1
+                    float3 displacement = v.normal * noiseValue * _DistortionVertex;
                     v.vertex.xyz += displacement;
                 }
 
 
-                o.uv = v.uv;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.normal = UnityObjectToWorldNormal(v.normal);
-                o.viewDir = normalize(ObjSpaceViewDir(v.vertex));
                 o.vertex = UnityObjectToClipPos(v.vertex);
 
                 return o;
@@ -292,15 +301,16 @@
                 if (_HasNoiseDistortion == 1)
                 {
                     // velocidade do movimento
-                    float2 noiseOffset = _NoiseDirection.xy * _Time.y * _NoiseSpeed;
+                    float2 noiseOffsetX = _NoiseDirectionX.xy * _Time.y * _NoiseSpeedX;
+                    float2 noiseOffsetY = _NoiseDirectionY.xy * _Time.y * _NoiseSpeedY;
 
                     // direção do movimento
-                    float2 uvNoiseX = finalUV + noiseOffset;
-                    float2 uvNoiseY = finalUV + noiseOffset;
+                    float2 uvNoiseX = finalUV + noiseOffsetX;
+                    float2 uvNoiseY = finalUV + noiseOffsetY;
 
                     float noiseValueX = (tex2D(_NoiseTextureX, uvNoiseX).r * 2.0) - 1.0;  // entre -1 e 1
                     float noiseValueY = (tex2D(_NoiseTextureY, uvNoiseY).r * 2.0) - 1.0;  // entre -1 e 1
-                    float2 noiseDistort = float2(noiseValueX, noiseValueY) * _NoiseDirection;
+                    float2 noiseDistort = float2(noiseValueX, noiseValueY);
 
                     float3 noiseTexture2 = tex2D(_MainTexture, finalUV + noiseDistort) * _Color;
 
@@ -315,20 +325,20 @@
                 // aplicar pulsação
                 if (_HasPulse == 1)
                 {
-                    float3 pulseColor = pulse(i.uv, _ScreenParams, _PulseColor, _Time, _PulseSpeed);
+                    float3 pulseColor = pulse(i.uv, _ScreenParams, _PulseColor, _Time, _PulseSpeed, _PulseCircle, _PulseIntensity);
                     finalColor.rgb = lerp(finalColor.rgb, pulseColor.rgb, 0.5);
                 }
 
 
                 /*******************************************************
-                *                   5 - LAZER                          *
+                *                   5 - LASER                          *
                 *******************************************************/
 
-                // aplicar lazer
-                if (_HasLazer == 1)
+                // aplicar laser
+                if (_HasLaser == 1)
                 {
-                    float laserAlpha = laser(i.uv, _LazerSpeed, _LazerWidth, _Time);
-                    finalColor.rgb = lerp(finalColor.rgb, _LazerColor.rgb, laserAlpha);
+                    float laserAlpha = laser(i.uv, _LaserSpeed, _LaserWidth, _Time);
+                    finalColor.rgb = lerp(finalColor.rgb, _LaserColor.rgb, laserAlpha);
                 }
 
 
