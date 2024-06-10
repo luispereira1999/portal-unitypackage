@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DissolveEffect : MonoBehaviour
 {
-    public float dissolveSpeed = 0.1f; 
+    public float dissolveSpeed = 1f; 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Shield"))
@@ -17,12 +17,13 @@ public class DissolveEffect : MonoBehaviour
 
     IEnumerator DissolveObject(Material shieldMaterial)
     {
-        float dissolveAmount = 0;
+        float dissolveAmount = 1; 
 
-        while (dissolveAmount <= 1) 
+        while (dissolveAmount > 0)
         {
-            dissolveAmount += Time.deltaTime * dissolveSpeed;
-            shieldMaterial.SetFloat("_DissolveAmount", 1 - dissolveAmount); 
+            dissolveAmount -= 0.05f * dissolveSpeed; 
+       
+            shieldMaterial.SetFloat("_DissolveAmount", dissolveAmount); 
             yield return null;
         }
 
