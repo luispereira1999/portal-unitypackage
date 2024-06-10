@@ -19,7 +19,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties: _SecondaryTexTransparency
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -100,7 +100,7 @@ Material:
     - _DissolveAmount: 1
     - _DissolveEdgeWidth: 0
     - _DissolveHighlightFactor: 19.7
-    - _DistortionStrength: 0.05
+    - _DistortionStrength: 0
     - _DstBlend: 0
     - _EdgeDissolveWidth: 0.079
     - _EdgeGlowMaxWidth: 0.5

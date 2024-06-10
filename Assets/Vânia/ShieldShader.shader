@@ -124,7 +124,7 @@ Shader "Unlit/ShieldShader"
                 color.rgb += edgeGlow.rgb * edgeGlow.a;
 
                 // efeito de dissolver
-                float dissolveValue = tex2D(_DissolveTexture, i.uv).r;
+                float dissolveValue = tex2D(_DissolveTexture, i.uv).g;
                 float dissolveAlpha = step(dissolveValue, _DissolveAmount);
                 
                 // borda no efeito de dissolver
