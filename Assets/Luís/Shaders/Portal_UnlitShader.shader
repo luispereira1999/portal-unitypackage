@@ -19,8 +19,8 @@
         // 2 - EFEITO FRESNEL
         [Space(10)] [Header(Fresnel)] [Space(5)]
         [Toggle] _HasFresnel ("Tem Fresnel?", Int) = 0
-        _FresnelColor ("Fresnel Cor", Color) = (0, 0, 1, 1)
-        _FresnelPower ("Fresnel Força", Range(0, 5)) = 1
+        _FresnelColor ("Cor da BordaCor", Color) = (0, 0, 1, 1)
+        _FresnelIntensity ("Intensidade do Fresnel", Range(0, 5)) = 1
 
 
         // 3 - RUÍDO
@@ -54,9 +54,9 @@
         // 6 - DISTORÇÃO DE VÉRTICES
         [Space(10)] [Header(Distorcao de Vertices)] [Space(5)]
         [Toggle] _HasVertexDistortion ("Tem Distorção de Vértices?", Int) = 0
-        _DistortionVertex ("Distorção dos Vértices", Range(0, 0.2)) = 0.03
-        _SpeedVertex ("Velocidade dos Vvértices", Range(0, 1)) = 0.1
-        _NoiseVertex ("Ruído dos Vértices", 2D) = "white" {}
+        _VertexDistortion ("Distorção dos Vértices", Range(0, 0.2)) = 0.03
+        _VertexSpeed ("Velocidade dos Vvértices", Range(0, 1)) = 0.1
+        _VertexNoise ("Ruído dos Vértices", 2D) = "white" {}
 
 
         // CONFIGURAÇÕES DE RENDERIZAÇÃO
@@ -88,7 +88,6 @@
             // CONFIGURAÇÕES GERAIS
             sampler2D _MainTexture;
             float4 _Color;
-            sampler2D _Normal;
 
 
             // 1 - ROTAÇÃO
@@ -101,7 +100,7 @@
             // 2 - EFEITO FRESNEL
             int _HasFresnel;
             float4 _FresnelColor;
-            float _FresnelPower;
+            float _FresnelIntensity;
 
 
             // 3 - RUÍDO
@@ -131,9 +130,9 @@
 
             // 6 - DISTORÇÃO DE VÉRTICES
             int _HasVertexDistortion;
-            sampler2D _NoiseVertex;
-            float _DistortionVertex;
-            float _SpeedVertex;
+            sampler2D _VertexNoise;
+            float _VertexDistortion;
+            float _VertexSpeed;
 
 
             // estas diretivas definem um buffer que armazena dados de cada instância do objeto, o que permite a renderização eficiente de múltiplas cópias de um objeto com variações mínimas
@@ -176,6 +175,23 @@
                 return pow((1.0 - saturate(dot(normalize(normal), normalize(view)))), amount);
             }
 
+            float2 noise(float2 uv, float3 noiseDirectionX, float3 noiseDirectionY, float _NoiseSpeedX, float _NoiseSpeedY, sampler2D _NoiseTextureX, sampler2D _NoiseTextureY, float4 time)
+            {
+                // velocidade do movimento
+                float2 noiseOffsetX = _NoiseDirectionX.xy * _Time.y * _NoiseSpeedX;
+                float2 noiseOffsetY = _NoiseDirectionY.xy * _Time.y * _NoiseSpeedY;
+
+                // direção do movimento
+                float2 uvNoiseX = uv + noiseOffsetX;
+                float2 uvNoiseY = uv + noiseOffsetY;
+
+                float noiseValueX = (tex2D(_NoiseTextureX, uvNoiseX).r * 2) - 1;  // entre -1 e 1
+                float noiseValueY = (tex2D(_NoiseTextureY, uvNoiseY).r * 2) - 1;  // entre -1 e 1
+             
+                float2 noiseDistort = float2(noiseValueX, noiseValueY);
+                return noiseDistort;
+            }
+
             float3 pulse(float2 uv, float4 screenParams, float4 pulseColor, float4 time, float _PulseRadialSpeed, float pulseCircle, float pulseIntensity)
             {
                 // normalizar as coordenadas para variar entre -1 a 1 em x e y
@@ -186,8 +202,7 @@
                 float radialDistance = length(normalizedCoords) / pulseCircle;
                 float squaredRadialDistance = pow(radialDistance, 2);
 
-                // criar efeito de ondulação através da função seno,
-                // que varia com a distância radial e o tempo
+                // criar efeito de ondulação através da função seno, que varia com a distância radial e o tempo
                 float sin1 = sin(radialDistance);
                 float combinedSin = sin(squaredRadialDistance - time.y * _PulseRadialSpeed + sin1) * sin1;
 
@@ -225,26 +240,15 @@
 
 
                 /*******************************************************
-                *                   2 - EFEITO FRESNEL                 *
-                *******************************************************/
-
-                // aplicar efeito fresnel
-                if (_HasFresnel == 1)
-                {
-                    o.vertex += fresnel(_FresnelPower, o.normal, o.viewDir);
-                }
-
-
-                /*******************************************************
                 *                   6 - DEFORMAR VÉRTICES              *
                 *******************************************************/
 
                 // aplicar deformação de vértices
                 if (_HasVertexDistortion == 1)
                 {
-                    float4 noiseSample = tex2Dlod(_NoiseVertex, float4(v.uv + (_Time.y * _SpeedVertex), 0, 0));
-                    float noiseValue = (noiseSample.r * 2.0) - 1.0;  // entre -1 e 1
-                    float3 displacement = v.normal * noiseValue * _DistortionVertex;
+                    float4 noiseSample = tex2Dlod(_VertexNoise, float4(v.uv + (_Time.y * _VertexSpeed), 0, 0));
+                    float noiseValue = (noiseSample.r * 2) - 1;  // entre -1 e 1
+                    float3 displacement = v.normal * noiseValue * _VertexDistortion;
                     v.vertex.xyz += displacement;
                 }
 
@@ -269,9 +273,9 @@
                 if (_HasRotation == 1)
                 {
                     if (_RotationIsFixed) {
-                        finalUV = RotateUV(i.uv, radians(_AngleDegrees));
+                        finalUV = RotateUV(finalUV, radians(_AngleDegrees));
                     } else {
-                        finalUV = RotateUV(i.uv, _Time.y * _RotationSpeed);
+                        finalUV = RotateUV(finalUV, _Time.y * _RotationSpeed);
                     }
 
                     float4 rotatedTexture = tex2D(_MainTexture, finalUV) * _Color;
@@ -286,7 +290,7 @@
                 // aplicar efeito fresnel
                 if (_HasFresnel == 1)
                 {
-                    float3 fresnelTint = (_FresnelColor.rgb * fresnel(_FresnelPower, i.normal, i.viewDir));
+                    float3 fresnelTint = (_FresnelColor.rgb * fresnel(_FresnelIntensity, i.normal, i.viewDir));
 
                     // 0.5: fornece um equilíbrio igual entre as duas texturas
                     finalColor.rgb = lerp(finalColor.rgb, fresnelTint.rgb, 0.5);
@@ -300,21 +304,9 @@
                 // aplicar ruído
                 if (_HasNoiseDistortion == 1)
                 {
-                    // velocidade do movimento
-                    float2 noiseOffsetX = _NoiseDirectionX.xy * _Time.y * _NoiseSpeedX;
-                    float2 noiseOffsetY = _NoiseDirectionY.xy * _Time.y * _NoiseSpeedY;
-
-                    // direção do movimento
-                    float2 uvNoiseX = finalUV + noiseOffsetX;
-                    float2 uvNoiseY = finalUV + noiseOffsetY;
-
-                    float noiseValueX = (tex2D(_NoiseTextureX, uvNoiseX).r * 2.0) - 1.0;  // entre -1 e 1
-                    float noiseValueY = (tex2D(_NoiseTextureY, uvNoiseY).r * 2.0) - 1.0;  // entre -1 e 1
-                    float2 noiseDistort = float2(noiseValueX, noiseValueY);
-
-                    float3 noiseTexture2 = tex2D(_MainTexture, finalUV + noiseDistort) * _Color;
-
-                    finalColor.rgb = lerp(finalColor.rgb, noiseTexture2, 0.5);
+                    float2 noiseDistort = noise(finalUV, _NoiseDirectionX, _NoiseDirectionY, _NoiseSpeedX, _NoiseSpeedY, _NoiseTextureX, _NoiseTextureY, _Time);
+                    float3 noiseColor = tex2D(_MainTexture, finalUV + noiseDistort) * _Color;
+                    finalColor.rgb = lerp(finalColor.rgb, noiseColor, 0.5);
                 }
                 
 
@@ -325,7 +317,7 @@
                 // aplicar pulsação
                 if (_HasPulse == 1)
                 {
-                    float3 pulseColor = pulse(i.uv, _ScreenParams, _PulseColor, _Time, _PulseSpeed, _PulseCircle, _PulseIntensity);
+                    float3 pulseColor = pulse(finalUV, _ScreenParams, _PulseColor, _Time, _PulseSpeed, _PulseCircle, _PulseIntensity);
                     finalColor.rgb = lerp(finalColor.rgb, pulseColor.rgb, 0.5);
                 }
 
@@ -337,7 +329,7 @@
                 // aplicar laser
                 if (_HasLaser == 1)
                 {
-                    float laserAlpha = laser(i.uv, _LaserSpeed, _LaserWidth, _Time);
+                    float laserAlpha = laser(finalUV, _LaserSpeed, _LaserWidth, _Time);
                     finalColor.rgb = lerp(finalColor.rgb, _LaserColor.rgb, laserAlpha);
                 }
 
