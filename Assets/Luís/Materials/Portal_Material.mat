@@ -12,7 +12,8 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _HASROTATION_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -140,7 +141,7 @@ Material:
     - _HasLazer: 0
     - _HasNoiseDistortion: 0
     - _HasPulse: 0
-    - _HasRotation: 0
+    - _HasRotation: 1
     - _HasTransparency: 0
     - _HasVertexDistortion: 0
     - _Intensity: 1
@@ -180,10 +181,10 @@ Material:
     - _VertexSpeed: 0.1
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.045176145, g: 0.17389397, b: 0.8867924, a: 1}
+    - _Color: {r: 0.46284798, g: 0.53007966, b: 0.8792453, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FresnelCenter: {r: 0, g: 0, b: 0, a: 0}
-    - _FresnelColor: {r: 0.27209473, g: 1, b: 0, a: 1}
+    - _FresnelColor: {r: 0.2705884, g: 1, b: 0, a: 1}
     - _GlowColor: {r: 1, g: 0, b: 0, a: 1}
     - _LaserColor: {r: 1, g: 0, b: 0, a: 1}
     - _LazerColor: {r: 0.19215685, g: 0.6989317, b: 0.75686276, a: 1}
