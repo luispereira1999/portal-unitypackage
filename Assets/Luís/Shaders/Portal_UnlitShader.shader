@@ -236,7 +236,9 @@
                 o.uv = v.uv;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.normal = UnityObjectToWorldNormal(v.normal);
-                o.viewDir = normalize(ObjSpaceViewDir(v.vertex));
+             
+                float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.viewDir = normalize(_WorldSpaceCameraPos - worldPos);
 
 
                 /*******************************************************
