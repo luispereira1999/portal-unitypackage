@@ -9,24 +9,24 @@ public class DissolveEffect : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Shield"))
         {
-            Renderer shieldRenderer = collision.gameObject.GetComponent<Renderer>();
-      
-            StartCoroutine(DissolveObject(shieldRenderer.material));
+            StartCoroutine(DissolveObject(collision.gameObject));
         }
     }
 
-    IEnumerator DissolveObject(Material shieldMaterial)
+        IEnumerator DissolveObject(GameObject shield)
     {
         float dissolveAmount = 1; 
+        Renderer shieldRenderer = shield.GetComponent<Renderer>();
 
         while (dissolveAmount > 0)
         {
             dissolveAmount -= 0.05f * dissolveSpeed; 
        
-            shieldMaterial.SetFloat("_DissolveAmount", dissolveAmount); 
+            shieldRenderer.material.SetFloat("_DissolveAmount", dissolveAmount); 
             yield return null;
         }
 
         Destroy(gameObject);
+        Destroy(shield);
     }
 }

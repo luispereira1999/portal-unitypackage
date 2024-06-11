@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PostProcessingSwitcher : MonoBehaviour
 {
-    public Material normalEffect;
+    public Material exitEffect;
 
     public Material portalEffect;
 
@@ -23,7 +23,7 @@ public class PostProcessingSwitcher : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            postProcess.m = normalEffect;
+            postProcess.m = exitEffect;
             Debug.Log("Exited the invisible box. Post-processing profile changed to normal.");
         }
     }
