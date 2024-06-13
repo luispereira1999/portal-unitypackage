@@ -48,7 +48,8 @@
         [Toggle] _HasLaser ("Tem Laser?", Int) = 0
         _LaserColor ("Cor do Laser", Color) = (1, 0, 0, 1)
         _LaserSpeed ("Velocidade do Laser", Range(0, 7)) = 1
-        _LaserWidth ("Largura do Laser", Range(0, 3)) = 2
+        _LaserWidth ("Largura do Laser", Range(0.1, 3)) = 2
+        _LazerIntensity ("Intensidade do Laser", Range(0.1, 10)) = 2
 
 
         // 6 - DISTORÇÃO DE VÉRTICES
@@ -67,12 +68,8 @@
     }
     SubShader
     {
-        Tags { "RenderType" = "Transparent" "Queue" = "Transparent" }
-     
         Blend [_BlendSrc] [_BlendDst]
         Cull [_Cull]
-
-        LOD 200
 
         Pass
         {
@@ -81,9 +78,6 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-
-            #pragma target 3.0
-
 
             // CONFIGURAÇÕES GERAIS
             sampler2D _MainTexture;
@@ -126,6 +120,7 @@
             float4 _LaserColor;
             float _LaserSpeed;
             float _LaserWidth;
+            float _LazerIntensity;
 
 
             // 6 - DISTORÇÃO DE VÉRTICES
@@ -133,11 +128,6 @@
             sampler2D _VertexNoise;
             float _VertexDistortion;
             float _VertexSpeed;
-
-
-            // estas diretivas definem um buffer que armazena dados de cada instância do objeto, o que permite a renderização eficiente de múltiplas cópias de um objeto com variações mínimas
-            UNITY_INSTANCING_BUFFER_START(Props)
-            UNITY_INSTANCING_BUFFER_END(Props)
 
 
             struct appdata
@@ -212,18 +202,15 @@
             }
 
 
-            float laser(float2 uv, float speed, float width, float4 time)
+            float laser(float2 uv, float speed, float width, float4 time, float intensity)
             {
                 // posição vertical entre 0 (baixo) e 1 (topo)
-                float laserPosition = abs(frac(time.y * speed * 0.5) * 2.0 - 1.0);
-                   
-                float laserCenter = laserPosition;
-                float distance = abs(uv.y - laserCenter);
-                float blur = smoothstep(0, 2, distance);
+                float laserVerticalPosition = abs(frac(time.y * speed) * 2.0 - 1.0);
+            
+                float distance = abs(uv.y - laserVerticalPosition);
 
-                float alpha = smoothstep(width * 0.5, -width * 0.5, distance);
-                alpha *= (1.0 - blur);
-                alpha *= 5;
+                float alpha = smoothstep(width * 0.5, -width * 0.5, distance);  // entre 0 e 1
+                alpha *= intensity;
 
                 return alpha;
             }
@@ -331,7 +318,7 @@
                 // aplicar laser
                 if (_HasLaser == 1)
                 {
-                    float laserAlpha = laser(finalUV, _LaserSpeed, _LaserWidth, _Time);
+                    float laserAlpha = laser(finalUV, _LaserSpeed, _LaserWidth, _Time, _LazerIntensity);
                     finalColor.rgb = lerp(finalColor.rgb, _LaserColor.rgb, laserAlpha);
                 }
 

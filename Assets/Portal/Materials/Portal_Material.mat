@@ -20,7 +20,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: _StripeWidth
+  m_LockedProperties: _RotationIsFixed _StripeWidth
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -145,8 +145,9 @@ Material:
     - _HasTransparency: 0
     - _HasVertexDistortion: 0
     - _Intensity: 1
-    - _LaserSpeed: 0.5
+    - _LaserSpeed: 0.2
     - _LaserWidth: 0.05
+    - _LazerIntensity: 2.5
     - _LazerSpeed: 0.3
     - _LazerWidth: 0.04
     - _LineThickness: 0.15
